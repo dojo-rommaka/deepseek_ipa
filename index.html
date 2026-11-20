@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phoneme & Viseme SVG Generator · Wikipedia Help:IPA</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #f5f7fc;
+      font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem 1rem;
+    }
+    .app-container {
+      max-width: 1300px;
+      width: 100%;
+      background: white;
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      padding: 2rem 2rem 2rem 2rem;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b1b2f;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    .subhead {
+      color: #4b5b6e;
+      margin-bottom: 2rem;
+      border-left: 5px solid #2e6b9e;
+      padding-left: 1rem;
+      font-size: 1rem;
+    }
+    .main-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .control-panel {
+      flex: 1 1 340px;
+      min-width: 300px;
+    }
+    .viseme-panel {
+      flex: 2 1 600px;
+      min-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .group-selector {
+      background: #f0f4fa;
+      border-radius: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .group-selector label {
+      font-weight: 600;
+      color: #1e3a5f;
+      display: block;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #articulationGroup {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 2rem;
+      background: white;
+      cursor: pointer;
+      outline: none;
+      transition: 0.15s;
+      font-weight: 500;
+      color: #0b1b2f;
+    }
+    #articulationGroup:focus {
+      border-color: #2e6b9e;
+      box-shadow: 0 0 0 4px rgba(46, 107, 158, 0.2);
+    }
+    .symbol-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 0.6rem;
+      margin: 1.5rem 0;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 0.3rem 0.2rem 0.3rem 0;
+    }
+    .symbol-btn {
+      background: white;
+      border: 2px solid #dbe1e9;
+      border-radius: 1rem;
+      padding: 0.7rem 0.2rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      font-family: 'Segoe UI', 'Charis SIL', 'Doulos SIL', 'Times New Roman', serif;
+      color: #0b1b2f;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .symbol-btn small {
+      font-size: 0.6rem;
+      font-weight: 400;
+      color: #6b7b8f;
+      margin-top: 2px;
+      font-family: system-ui, sans-serif;
+    }
+    .symbol-btn:hover {
+      background: #e8f0fe;
+      border-color: #2e6b9e;
+      transform: translateY(-2px);
+    }
+    .symbol-btn.active {
+      background: #1e3a5f;
+      border-color: #1e3a5f;
+      color: white;
+      box-shadow: 0 8px 14px -6px rgba(30, 58, 95, 0.4);
+    }
+    .symbol-btn.active small {
+      color: #b8d0e9;
+    }
+    .viseme-svg-container {
+      background: #ffffff;
+      border-radius: 2rem;
+      padding: 1.5rem 1.5rem 0.8rem 1.5rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9edf3;
+    }
+    .svg-wrapper {
+      width: 100%;
+      max-width: 700px;
+      aspect-ratio: 700 / 500;
+      background: #fbfdff;
+      border-radius: 1.8rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.02));
+    }
+    .viseme-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #0b1b2f;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .viseme-title .ipa-badge {
+      background: #1e3a5f;
+      color: white;
+      padding: 0.2rem 1rem;
+      border-radius: 3rem;
+      font-size: 1.8rem;
+      font-family: 'Charis SIL', 'Doulos SIL', 'Times New Roman', serif;
+      line-height: 1.4;
+    }
+    .articulation-desc {
+      background: #f0f4fa;
+      padding: 1rem 1.5rem;
+      border-radius: 2rem;
+      color: #1f3a57;
+      font-size: 0.95rem;
+      text-align: center;
+      margin: 1rem 0 0.5rem 0;
+      width: 100%;
+      line-height: 1.5;
+      font-weight: 450;
+    }
+    .airflow-legend {
+      display: flex;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #526477;
+      justify-content: center;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .footer-note {
+      font-size: 0.75rem;
+      color: #99a9bb;
+      text-align: center;
+      margin-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <h1>🗣️ Phoneme & Viseme SVG Generator</h1>
+  <div class="subhead">Complete Wikipedia Help:IPA articulatory groups · Anatomical cross-section / frontal-oblique diagrams</div>
+  <div class="main-panel">
+    <!-- LEFT: CONTROLS -->
+    <div class="control-panel">
+      <div class="group-selector">
+        <label for="articulationGroup">Articulatory group</label>
+        <select id="articulationGroup"></select>
+      </div>
+      <div id="symbolGrid" class="symbol-grid"></div>
+    </div>
+    <!-- RIGHT: SVG VISUAL -->
+    <div class="viseme-panel">
+      <div class="viseme-svg-container">
+        <div class="svg-wrapper" id="svgWrapper">
+          <!-- SVG injected here -->
+        </div>
+        <div class="viseme-title" id="visemeTitle">
+          <span class="ipa-badge" id="currentSymbolDisplay">p</span>
+          <span id="currentDescription">Voiceless bilabial plosive</span>
+        </div>
+        <div class="articulation-desc" id="articulationDetail"></div>
+        <div class="airflow-legend">
+          <span><span class="legend-dot" style="background:#e63946;"></span>airflow / voicing</span>
+          <span><span class="legend-dot" style="background:#2a6f97;"></span>articulators</span>
+          <span><span class="legend-dot" style="background:#d4a373;"></span>palate / ridge</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note">
+    ⚡ Pure Vanilla JS + inline SVG · all visemes rendered as modular anatomical diagrams · IPA chart coverage based on Wikipedia Help:IPA
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // 1. COMPLETE PHONEME DATABASE (Wikipedia Help:IPA groups)
+  // ============================================================
+  const phonemeDatabase = {
+    // ----- BILABIAL -----
+    "Bilabial": {
+      articulations: [
+        { symbol: "p", description: "Voiceless bilabial plosive", detail: "Both lips pressed together, then released with a burst of air. Vocal folds do not vibrate." },
+        { symbol: "b", description: "Voiced bilabial plosive", detail: "Both lips pressed together, released with voicing (vocal fold vibration)." },
+        { symbol: "m", description: "Voiced bilabial nasal", detail: "Lips closed; air escapes through the nasal cavity while vocal folds vibrate." },
+        { symbol: "ɸ", description: "Voiceless bilabial fricative", detail: "Lips close but not fully touching; turbulent airflow between them, no voicing." },
+        { symbol: "β", description: "Voiced bilabial fricative", detail: "Lips close but not fully touching; turbulent airflow, vocal folds vibrate." }
+      ]
+    },
+    // ----- LABIODENTAL -----
+    "Labiodental": {
+      articulations: [
+        { symbol: "f", description: "Voiceless labiodental fricative", detail: "Lower lip touches upper teeth; air flows through narrow gap, no voicing." },
+        { symbol: "v", description: "Voiced labiodental fricative", detail: "Lower lip against upper teeth, turbulent airflow, vocal folds vibrate." },
+        { symbol: "ʋ", description: "Voiced labiodental approximant", detail: "Lower lip approaches upper teeth without turbulence; smooth voiced airflow." }
+      ]
+    },
+    // ----- DENTAL -----
+    "Dental": {
+      articulations: [
+        { symbol: "θ", description: "Voiceless dental fricative", detail: "Tongue tip between teeth or against upper teeth; air hisses, no voicing." },
+        { symbol: "ð", description: "Voiced dental fricative", detail: "Tongue tip between/behind upper teeth; voiced turbulent airflow." }
+      ]
+    },
+    // ----- ALVEOLAR -----
+    "Alveolar": {
+      articulations: [
+        { symbol: "t", description: "Voiceless alveolar plosive", detail: "Tongue tip against alveolar ridge; sudden release, no voicing." },
+        { symbol: "d", description: "Voiced alveolar plosive", detail: "Tongue tip against alveolar ridge; release with vocal fold vibration." },
+        { symbol: "n", description: "Voiced alveolar nasal", detail: "Tongue tip seals alveolar ridge; air through nose, voiced." },
+        { symbol: "s", description: "Voiceless alveolar fricative", detail: "Tongue tip near alveolar ridge; high-frequency turbulence, no voicing." },
+        { symbol: "z", description: "Voiced alveolar fricative", detail: "Tongue tip near alveolar ridge; buzzing turbulent airflow, voiced." },
+        { symbol: "l", description: "Voiced alveolar lateral approximant", detail: "Tongue tip touches ridge; air flows around sides, voiced." },
+        { symbol: "r", description: "Voiced alveolar trill", detail: "Tongue tip vibrates against alveolar ridge; voiced trilling." },
+        { symbol: "ɾ", description: "Voiced alveolar tap/flap", detail: "Single quick contact of tongue tip with alveolar ridge; voiced." }
+      ]
+    },
+    // ----- POSTALVEOLAR -----
+    "Postalveolar": {
+      articulations: [
+        { symbol: "ʃ", description: "Voiceless postalveolar fricative", detail: "Tongue blade near postalveolar region; 'sh' sound, no voicing." },
+        { symbol: "ʒ", description: "Voiced postalveolar fricative", detail: "Tongue blade near postalveolar region; 'zh' sound, voiced." },
+        { symbol: "tʃ", description: "Voiceless postalveolar affricate", detail: "Stop release into fricative; 'ch' sound, no voicing." },
+        { symbol: "dʒ", description: "Voiced postalveolar affricate", detail: "Stop release into fricative; 'j' sound, voiced." }
+      ]
+    },
+    // ----- RETROFLEX -----
+    "Retroflex": {
+      articulations: [
+        { symbol: "ʈ", description: "Voiceless retroflex plosive", detail: "Tongue tip curled back to touch postalveolar/retroflex area; no voicing." },
+        { symbol: "ɖ", description: "Voiced retroflex plosive", detail: "Tongue tip curled back; release with voicing." },
+        { symbol: "ʂ", description: "Voiceless retroflex fricative", detail: "Tongue tip curled back, turbulent airflow, no voicing." },
+        { symbol: "ʐ", description: "Voiced retroflex fricative", detail: "Tongue tip curled back, turbulent airflow, voiced." },
+        { symbol: "ɻ", description: "Voiced retroflex approximant", detail: "Tongue tip curled back, smooth voiced airflow." }
+      ]
+    },
+    // ----- PALATAL -----
+    "Palatal": {
+      articulations: [
+        { symbol: "c", description: "Voiceless palatal plosive", detail: "Tongue body against hard palate; release without voicing." },
+        { symbol: "ɟ", description: "Voiced palatal plosive", detail: "Tongue body against hard palate; release with voicing." },
+        { symbol: "j", description: "Voiced palatal approximant", detail: "Tongue body near hard palate; smooth 'y' sound, voiced." },
+        { symbol: "ç", description: "Voiceless palatal fricative", detail: "Tongue body near palate; turbulent 'h' + 'y', no voicing." },
+        { symbol: "ʝ", description: "Voiced palatal fricative", detail: "Tongue body near palate; turbulent voiced airflow." },
+        { symbol: "ɲ", description: "Voiced palatal nasal", detail: "Tongue body against palate; air through nose, voiced." }
+      ]
+    },
+    // ----- VELAR -----
+    "Velar": {
+      articulations: [
+        { symbol: "k", description: "Voiceless velar plosive", detail: "Back of tongue against soft palate; release without voicing." },
+        { symbol: "ɡ", description: "Voiced velar plosive", detail: "Back of tongue against soft palate; release with voicing." },
+        { symbol: "ŋ", description: "Voiced velar nasal", detail: "Back of tongue against soft palate; nasal airflow, voiced." },
+        { symbol: "x", description: "Voiceless velar fricative", detail: "Back of tongue near soft palate; turbulent 'ch' (loch), no voicing." },
+        { symbol: "ɣ", description: "Voiced velar fricative", detail: "Back of tongue near soft palate; voiced turbulent airflow." },
+        { symbol: "w", description: "Voiced labial-velar approximant", detail: "Lips rounded + tongue back near velum; smooth voiced glide." }
+      ]
+    },
+    // ----- UVULAR -----
+    "Uvular": {
+      articulations: [
+        { symbol: "q", description: "Voiceless uvular plosive", detail: "Back of tongue against uvula; release without voicing." },
+        { symbol: "ɢ", description: "Voiced uvular plosive", detail: "Back of tongue against uvula; release with voicing." },
+        { symbol: "χ", description: "Voiceless uvular fricative", detail: "Turbulent airflow at uvula; no voicing." },
+        { symbol: "ʁ", description: "Voiced uvular fricative", detail: "Turbulent voiced airflow at uvula; French 'r'." },
+        { symbol: "ɴ", description: "Voiced uvular nasal", detail: "Back of tongue against uvula; nasal airflow, voiced." }
+      ]
+    },
+    // ----- PHARYNGEAL -----
+    "Pharyngeal": {
+      articulations: [
+        { symbol: "ħ", description: "Voiceless pharyngeal fricative", detail: "Constriction in pharynx; whispered 'h' deep in throat, no voicing." },
+        { symbol: "ʕ", description: "Voiced pharyngeal fricative", detail: "Constriction in pharynx; voiced, deep throat sound." }
+      ]
+    },
+    // ----- GLOTTAL -----
+    "Glottal": {
+      articulations: [
+        { symbol: "ʔ", description: "Glottal stop", detail: "Vocal folds tightly closed then released; catch in the throat." },
+        { symbol: "h", description: "Voiceless glottal fricative", detail: "Vocal folds open; turbulent airflow, no voicing." },
+        { symbol: "ɦ", description: "Voiced glottal fricative", detail: "Vocal folds vibrating with breathy turbulence." }
+      ]
+    },
+    // ----- VOWELS: CLOSE -----
+    "Close vowels": {
+      articulations: [
+        { symbol: "i", description: "Close front unrounded vowel", detail: "Tongue high and forward; lips spread. Like 'ee' in see." },
+        { symbol: "y", description: "Close front rounded vowel", detail: "Tongue high and forward; lips rounded. French 'u' / German 'ü'." },
+        { symbol: "ɨ", description: "Close central unrounded vowel", detail: "Tongue high and central; lips neutral. Russian 'ы'." },
+        { symbol: "ʉ", description: "Close central rounded vowel", detail: "Tongue high and central; lips rounded." },
+        { symbol: "ɯ", description: "Close back unrounded vowel", detail: "Tongue high and back; lips unrounded. Turkish 'ı'." },
+        { symbol: "u", description: "Close back rounded vowel", detail: "Tongue high and back; lips rounded. Like 'oo' in boot." },
+        { symbol: "ɪ", description: "Near-close front unrounded vowel", detail: "Tongue slightly lower than [i]; lax 'i' as in sit." },
+        { symbol: "ʊ", description: "Near-close back rounded vowel", detail: "Tongue slightly lower than [u]; lax 'u' as in foot." }
+      ]
+    },
+    // ----- VOWELS: CLOSE-MID -----
+    "Close-mid vowels": {
+      articulations: [
+        { symbol: "e", description: "Close-mid front unrounded vowel", detail: "Tongue mid-high, forward; lips spread. Spanish 'e'." },
+        { symbol: "ø", description: "Close-mid front rounded vowel", detail: "Tongue mid-high, forward; lips rounded. French 'eu'." },
+        { symbol: "ɘ", description: "Close-mid central unrounded vowel", detail: "Tongue mid-high, central; lips neutral." },
+        { symbol: "ɵ", description: "Close-mid central rounded vowel", detail: "Tongue mid-high, central; lips rounded." },
+        { symbol: "ɤ", description: "Close-mid back unrounded vowel", detail: "Tongue mid-high, back; lips unrounded. Mandarin 'e'." },
+        { symbol: "o", description: "Close-mid back rounded vowel", detail: "Tongue mid-high, back; lips rounded. Spanish 'o'." }
+      ]
+    },
+    // ----- VOWELS: OPEN-MID -----
+    "Open-mid vowels": {
+      articulations: [
+        { symbol: "ɛ", description: "Open-mid front unrounded vowel", detail: "Tongue mid-low, forward; lips spread. 'e' in bet." },
+        { symbol: "œ", description: "Open-mid front rounded vowel", detail: "Tongue mid-low, forward; lips rounded. French 'œu'." },
+        { symbol: "ɜ", description: "Open-mid central unrounded vowel", detail: "Tongue mid-low, central; lips neutral. British 'bird'." },
+        { symbol: "ɞ", description: "Open-mid central rounded vowel", detail: "Tongue mid-low, central; lips rounded." },
+        { symbol: "ʌ", description: "Open-mid back unrounded vowel", detail: "Tongue mid-low, back; lips unrounded. 'u' in cut." },
+        { symbol: "ɔ", description: "Open-mid back rounded vowel", detail: "Tongue mid-low, back; lips rounded. 'aw' in thought." }
+      ]
+    },
+    // ----- VOWELS: OPEN -----
+    "Open vowels": {
+      articulations: [
+        { symbol: "æ", description: "Near-open front unrounded vowel", detail: "Tongue low and forward; lips spread. 'a' in cat." },
+        { symbol: "a", description: "Open front unrounded vowel", detail: "Tongue lowest and forward; lips spread. French 'a'." },
+        { symbol: "ɶ", description: "Open front rounded vowel", detail: "Tongue lowest and forward; lips rounded." },
+        { symbol: "ä", description: "Open central unrounded vowel", detail: "Tongue lowest and central; lips neutral." },
+        { symbol: "ɑ", description: "Open back unrounded vowel", detail: "Tongue lowest and back; lips unrounded. 'a' in father." },
+        { symbol: "ɒ", description: "Open back rounded vowel", detail: "Tongue lowest and back; lips rounded. British 'o' in lot." }
+      ]
+    }
+  };
+
+  // ============================================================
+  // 2. SVG RENDERING ENGINE — anatomical cross-section
+  // ============================================================
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function createSVGElement(tag, attrs = {}) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (let [key, val] of Object.entries(attrs)) {
+      el.setAttribute(key, val);
+    }
+    return el;
+  }
+
+  /**
+   * Builds a complete anatomical mouth diagram (frontal-oblique cross-section)
+   * with lips, teeth, alveolar ridge, hard/soft palate, tongue, and airflow/voicing.
+   * All coordinates are in a 700x500 viewBox.
+   */
+  function generateVisemeSVG(articulation) {
+    const svg = createSVGElement("svg", {
+      viewBox: "0 0 700 500",
+      xmlns: SVG_NS,
+      "xmlns:xlink": "http://www.w3.org/1999/xlink",
+      style: "background: transparent;"
+    });
+
+    // ---- 1. Background / anatomical framework ----
+    // Soft tissue outline (profile facing right)
+    const bgPath = createSVGElement("path", {
+      d: "M 120 70 Q 200 30 320 40 Q 460 50 540 120 Q 600 180 610 280 Q 620 380 550 430 Q 480 470 380 450 Q 280 440 200 380 Q 110 310 100 200 Q 95 130 120 70 Z",
+      fill: "#fdf6f0",
+      stroke: "#d9c7b8",
+      "stroke-width": 2,
+      opacity: 0.9
+    });
+    svg.appendChild(bgPath);
+
+    // ---- 2. Hard palate (fixed structure) ----
+    const hardPalate = createSVGElement("path", {
+      d: "M 360 120 Q 440 100 520 140 Q 550 155 555 180 L 530 185 Q 500 155 430 135 Q 380 125 355 130 Z",
+      fill: "#e2d4c8",
+      stroke: "#b8a99a",
+      "stroke-width": 1.5
+    });
+    svg.appendChild(hardPalate);
+
+    // ---- 3. Soft palate (velum) ----
+    const softPalate = createSVGElement("path", {
+      d: "M 520 140 Q 570 155 590 200 Q 600 230 580 260 Q 560 250 545 220 Q 535 190 520 170 Z",
+      fill: "#dac9bb",
+      stroke: "#b8a99a",
+      "stroke-width": 1.5
+    });
+    svg.appendChild(softPalate);
+
+    // ---- 4. Alveolar ridge ----
+    const alveolarRidge = createSVGElement("path", {
+      d: "M 340 150 Q 370 130 410 130 Q 430 130 450 140 L 445 155 Q 420 145 390 145 Q 365 145 345 160 Z",
+      fill: "#cfc0b2",
+      stroke: "#a89584",
+      "stroke-width": 1.2
+    });
+    svg.appendChild(alveolarRidge);
+
+    // ---- 5. Upper teeth ----
+    const upperTeeth = createSVGElement("path", {
+      d: "M 320 170 L 360 155 L 410 155 L 450 168 L 450 185 L 410 175 L 360 175 L 320 188 Z",
+      fill: "#ffffff",
+      stroke: "#b0a090",
+      "stroke-width": 1.2
+    });
+    svg.appendChild(upperTeeth);
+    // tooth divisions
+    for (let x of [350, 380, 410, 435]) {
+      svg.appendChild(createSVGElement("line", {
+        x1: x, y1: x < 400 ? 157 : 158, x2: x, y2: 183,
+        stroke: "#d0c0b0", "stroke-width": 0.8
+      }));
+    }
+
+    // ---- 6. Lower teeth ----
+    const lowerTeeth = createSVGElement("path", {
+      d: "M 300 310 L 350 295 L 410 295 L 460 308 L 460 325 L 410 315 L 350 315 L 300 328 Z",
+      fill: "#ffffff",
+      stroke: "#b0a090",
+      "stroke-width": 1.2
+    });
+    svg.appendChild(lowerTeeth);
+    for (let x of [340, 380, 420, 448]) {
+      svg.appendChild(createSVGElement("line", {
+        x1: x, y1: 298, x2: x, y2: 322,
+        stroke: "#d0c0b0", "stroke-width": 0.8
+      }));
+    }
+
+    // ---- 7. Lips (upper & lower) ----
+    const upperLip = createSVGElement("path", {
+      d: "M 250 200 Q 300 170 370 170 Q 420 170 460 190 Q 440 200 400 195 Q 350 190 300 205 Q 270 212 250 200 Z",
+      fill: "#e8b4b8",
+      stroke: "#c98a90",
+      "stroke-width": 1.5
+    });
+    svg.appendChild(upperLip);
+
+    const lowerLip = createSVGElement("path", {
+      d: "M 250 310 Q 300 335 370 330 Q 430 325 470 300 Q 450 295 400 305 Q 340 315 290 305 Q 265 300 250 310 Z",
+      fill: "#e8b4b8",
+      stroke: "#c98a90",
+      "stroke-width": 1.5
+    });
+    svg.appendChild(lowerLip);
+
+    // ---- 8. Tongue (base shape, will be adjusted per viseme) ----
+    // Default tongue position: mid, neutral
+    let tonguePath = "M 280 290 Q 320 260 380 260 Q 430 260 470 280 Q 480 300 450 320 Q 400 340 340 335 Q 290 330 270 315 Q 265 300 280 290 Z";
+    const tongue = createSVGElement("path", {
+      d: tonguePath,
+      fill: "#e07a5f",
+      stroke: "#b85c44",
+      "stroke-width": 1.8,
+      opacity: 0.85
+    });
+    svg.appendChild(tongue);
+
+    // ---- 9. Airflow / voicing indicators (dynamic) ----
+    // These are added conditionally based on phoneme characteristics
+
+    // ---- 10. Anatomical labels (optional, subtle) ----
+    // Add small labels for clarity
+    const labels = [
+      { text: "upper lip", x: 270, y: 160, anchor: "middle" },
+      { text: "alveolar ridge", x: 400, y: 115, anchor: "middle" },
+      { text: "hard palate", x: 480, y: 100, anchor: "middle" },
+      { text: "soft palate", x: 590, y: 155, anchor: "middle" },
+      { text: "tongue", x: 390, y: 380, anchor: "middle" },
+      { text: "lower lip", x: 280, y: 340, anchor: "middle" }
+    ];
+    labels.forEach(l => {
+      const txt = createSVGElement("text", {
+        x: l.x, y: l.y,
+        "text-anchor": l.anchor,
+        "font-size": "9",
+        fill: "#a08b7a",
+        "font-family": "system-ui, sans-serif",
+        "font-weight": "500",
+        opacity: 0.7
+      });
+      txt.textContent = l.text;
+      svg.appendChild(txt);
+    });
+
+    // ---- 11. APPLY PHONEME-SPECIFIC MODIFICATIONS ----
+    // We determine characteristics from the symbol itself
+
+    const symbol = articulation.symbol;
+    const isVoiced = ["b","d","ɡ","v","ð","z","ʒ","ʐ","ʝ","ɣ","ʁ","ʕ","ɦ","m","n","ŋ","ɲ","ɴ","l","r","ɾ","ɻ","j","w","ʋ","β","ɸ","ç","x","χ","ħ","h","ʔ","i","y","ɨ","ʉ","ɯ","u","ɪ","ʊ","e","ø","ɘ","ɵ","ɤ","o","ɛ","œ","ɜ","ɞ","ʌ","ɔ","æ","a","ɶ","ä","ɑ","ɒ"].includes(symbol);
+    const isNasal = ["m","n","ŋ","ɲ","ɴ"].includes(symbol);
+    const isPlosive = ["p","b","t","d","k","ɡ","q","ɢ","ʔ","c","ɟ","ʈ","ɖ"].includes(symbol);
+    const isFricative = ["f","v","θ","ð","s","z","ʃ","ʒ","ʂ","ʐ","ç","ʝ","x","ɣ","χ","ʁ","ħ","ʕ","h","ɦ","ɸ","β"].includes(symbol);
+    const isApproximant = ["ʋ","ɻ","j","w","l","ɭ","ʎ","ʟ","ɥ","ɰ"].includes(symbol);
+    const isVowel = ["i","y","ɨ","ʉ","ɯ","u","ɪ","ʊ","e","ø","ɘ","ɵ","ɤ","o","ɛ","œ","ɜ","ɞ","ʌ","ɔ","æ","a","ɶ","ä","ɑ","ɒ"].includes(symbol);
+
+    // --- 11a. Adjust tongue position (simplified but visually distinctive) ---
+    if (isVowel) {
+      // Vowel tongue positions: based on height (close vs open) and backness
+      const closeVowels = ["i","y","ɨ","ʉ","ɯ","u","ɪ","ʊ"];
+      const openVowels = ["æ","a","ɶ","ä","ɑ","ɒ","ɛ","œ","ɜ","ɞ","ʌ","ɔ"];
+      const frontVowels = ["i","y","ɪ","e","ø","ɛ","œ","æ","a","ɶ"];
+      const backVowels = ["ɯ","u","ʊ","ɤ","o","ʌ","ɔ","ɑ","ɒ"];
+
+      let tongueY = 280; // base
+      let tongueX = 350; // base
+
+      if (closeVowels.includes(symbol)) { tongueY = 240; tongueX = 360; }
+      if (openVowels.includes(symbol)) { tongueY = 310; tongueX = 330; }
+      if (frontVowels.includes(symbol)) { tongueX = 320; }
+      if (backVowels.includes(symbol)) { tongueX = 430; }
+
+      // Slight Y adjustment for open/close
+      tongue.setAttribute("d", `M 260 ${tongueY+15} Q 300 ${tongueY-25} ${tongueX+20} ${tongueY-30} Q ${tongueX+80} ${tongueY-25} ${tongueX+120} ${tongueY+5} Q ${tongueX+130} ${tongueY+30} ${tongueX+80} ${tongueY+45} Q ${tongueX+20} ${tongueY+50} 290 ${tongueY+40} Q 260 ${tongueY+30} 260 ${tongueY+15} Z`);
+    } else {
+      // Consonant tongue adjustments based on place
+      if (["p","b","m","ɸ","β"].includes(symbol)) {
+        // Bilabial: tongue neutral, slightly retracted
+        tongue.setAttribute("d", "M 270 295 Q 310 265 370 265 Q 420 265 460 285 Q 470 305 440 325 Q 390 345 330 340 Q 280 335 265 320 Q 260 305 270 295 Z");
+      } else if (["f","v","ʋ"].includes(symbol)) {
+        // Labiodental: tongue neutral, lower lip raised
+        tongue.setAttribute("d", "M 270 290 Q 310 260 380 260 Q 430 260 470 280 Q 480 300 450 320 Q 400 340 340 335 Q 290 330 270 315 Q 265 300 270 290 Z");
+      } else if (["θ","ð"].includes(symbol)) {
+        // Dental: tongue tip forward
+        tongue.setAttribute("d", "M 250 300 Q 290 270 350 270 Q 400 270 440 290 Q 450 310 420 330 Q 370 350 310 345 Q 260 340 245 325 Q 240 310 250 300 Z");
+      } else if (["t","d","n","s","z","l","r","ɾ"].includes(symbol)) {
+        // Alveolar: tongue tip up to ridge
+        tongue.setAttribute("d", "M 270 280 Q 310 240 370 240 Q 420 240 460 260 Q 470 285 440 305 Q 390 325 330 320 Q 280 315 265 295 Q 260 285 270 280 Z");
+      } else if (["ʃ","ʒ","tʃ","dʒ"].includes(symbol)) {
+        // Postalveolar: tongue blade raised
+        tongue.setAttribute("d", "M 280 275 Q 320 235 380 235 Q 430 235 465 255 Q 475 280 445 300 Q 395 320 335 315 Q 285 310 270 290 Q 265 280 280 275 Z");
+      } else if (["k","ɡ","ŋ","x","ɣ","w"].includes(symbol)) {
+        // Velar: back of tongue raised
+        tongue.setAttribute("d", "M 290 290 Q 340 260 400 260 Q 460 260 500 280 Q 510 300 480 320 Q 430 340 370 335 Q 310 330 285 315 Q 280 300 290 290 Z");
+      } else if (["q","ɢ","χ","ʁ","ɴ"].includes(symbol)) {
+        // Uvular: back of tongue retracted and raised
+        tongue.setAttribute("d", "M 310 300 Q 360 270 420 270 Q 480 270 520 290 Q 530 310 500 330 Q 450 350 390 345 Q 330 340 305 325 Q 300 310 310 300 Z");
+      } else if (["ħ","ʕ"].includes(symbol)) {
+        // Pharyngeal: tongue root retracted
+        tongue.setAttribute("d", "M 300 310 Q 350 280 410 280 Q 470 280 510 300 Q 520 320 490 340 Q 440 360 380 355 Q 320 350 295 335 Q 290 320 300 310 Z");
+      } else if (["ʔ","h","ɦ"].includes(symbol)) {
+        // Glottal: tongue neutral
+        tongue.setAttribute("d", "M 280 295 Q 320 265 380 265 Q 430 265 470 285 Q 480 305 450 325 Q 400 345 340 340 Q 290 335 275 320 Q 270 305 280 295 Z");
+      }
+    }
+
+    // --- 11b. Lip rounding / spreading ---
+    const roundedVowels = ["y","ʉ","u","ʊ","ø","ɵ","o","œ","ɞ","ɔ","ɶ","ɒ"];
+    const spreadVowels = ["i","ɪ","e","ɛ","æ","a","ɨ","ɘ","ɜ","ɤ","ʌ","ɑ","ä","ɯ"];
+    const isRounded = roundedVowels.includes(symbol) || ["w","ɥ","ʷ"].includes(symbol);
+    const isSpread = spreadVowels.includes(symbol);
+
+    if (isRounded) {
+      // Modify lips to be rounded (puckered)
+      upperLip.setAttribute("d", "M 250 195 Q 300 160 370 160 Q 430 160 470 180 Q 450 195 400 188 Q 350 182 300 200 Q 270 208 250 195 Z");
+      lowerLip.setAttribute("d", "M 250 315 Q 300 345 370 340 Q 440 335 480 310 Q 460 300 400 310 Q 340 320 290 308 Q 265 300 250 315 Z");
+      // draw small roundness indicator
+      const roundInd = createSVGElement("circle", { cx: 240, cy: 260, r: 18, fill: "none", stroke: "#e07a5f", "stroke-width": 2, "stroke-dasharray": "4 3", opacity: 0.6 });
+      svg.appendChild(roundInd);
+    } else if (isSpread) {
+      // Spread lips
+      upperLip.setAttribute("d", "M 230 200 Q 290 175 370 175 Q 440 175 480 195 Q 455 205 405 198 Q 350 192 295 205 Q 260 212 230 200 Z");
+      lowerLip.setAttribute("d", "M 230 310 Q 290 335 370 330 Q 450 325 490 300 Q 465 295 405 305 Q 345 315 290 305 Q 255 300 230 310 Z");
+    }
+
+    // --- 11c. Airflow indicators (turbulence, burst, nasal, voicing) ---
+    if (isPlosive && !isNasal) {
+      // Burst of air at release point
+      const burstX = symbol === "p" || symbol === "b" || symbol === "m" ? 380 : (["k","ɡ","ŋ"].includes(symbol) ? 470 : 420);
+      const burstY = 220;
+      for (let i = 0; i < 5; i++) {
+        const line = createSVGElement("line", {
+          x1: burstX + i*8, y1: burstY,
+          x2: burstX + i*8 + 12, y2: burstY - 15 - i*2,
+          stroke: "#e63946", "stroke-width": 2, opacity: 0.6, "stroke-linecap": "round"
+        });
+        svg.appendChild(line);
+      }
+    }
+
+    if (isFricative) {
+      // Wavy turbulence arrows
+      for (let i = 0; i < 4; i++) {
+        const wave = createSVGElement("path", {
+          d: `M ${350 + i*20} 230 Q ${360 + i*20} 220 ${370 + i*20} 230 Q ${380 + i*20} 240 ${390 + i*20} 230`,
+          stroke: "#e63946", "stroke-width": 2, fill: "none", opacity: 0.7
+        });
+        svg.appendChild(wave);
+      }
+    }
+
+    if (isNasal) {
+      // Nasal airflow indicator (through nose)
+      const nasalArrow = createSVGElement("path", {
+        d: "M 520 90 Q 560 70 600 90 Q 620 110 610 130",
+        stroke: "#2a6f97", "stroke-width": 3, fill: "none", "stroke-dasharray": "8 5", opacity: 0.8
+      });
+      svg.appendChild(nasalArrow);
+      const nasalText = createSVGElement("text", { x: 610, y: 80, "font-size": "12", fill: "#2a6f97", "font-weight": "600" });
+      nasalText.textContent = "nasal";
+      svg.appendChild(nasalText);
+    }
+
+    if (isVoiced) {
+      // Voicing indicator (vocal fold vibration waves near glottis)
+      const voiceWaves = createSVGElement("path", {
+        d: "M 120 240 Q 140 220 160 240 Q 180 260 200 240 Q 220 220 240 240",
+        stroke: "#2a6f97", "stroke-width": 2.5, fill: "none", opacity: 0.8
+      });
+      svg.appendChild(voiceWaves);
+      const vText = createSVGElement("text", { x: 140, y: 210, "font-size": "11", fill: "#2a6f97", "font-weight": "600" });
+      vText.textContent = "voiced";
+      svg.appendChild(vText);
+    } else if (!isVowel && !isNasal) {
+      // Voiceless indicator (no waves)
+      const vless = createSVGElement("text", { x: 140, y: 210, "font-size": "11", fill: "#6b7b8f", "font-weight": "500" });
+      vless.textContent = "voiceless";
+      svg.appendChild(vless);
+    }
+
+    // Add a subtle label for the active articulator
+    const articulatorLabel = createSVGElement("text", {
+      x: 600, y: 460,
+      "font-size": "11",
+      fill: "#a08b7a",
+      "font-family": "system-ui, sans-serif",
+      "text-anchor": "end"
+    });
+    // Could add, but keep clean
+
+    return svg;
+  }
+
+  // ============================================================
+  // 3. UI LOGIC
+  // ============================================================
+  const groupSelect = document.getElementById("articulationGroup");
+  const symbolGrid = document.getElementById("symbolGrid");
+  const svgWrapper = document.getElementById("svgWrapper");
+  const currentSymbolDisplay = document.getElementById("currentSymbolDisplay");
+  const currentDescription = document.getElementById("currentDescription");
+  const articulationDetail = document.getElementById("articulationDetail");
+
+  let currentGroup = "Bilabial";
+  let currentArticulation = phonemeDatabase["Bilabial"].articulations[0];
+
+  // Populate group select
+  function populateGroups() {
+    groupSelect.innerHTML = "";
+    for (let group in phonemeDatabase) {
+      const option = document.createElement("option");
+      option.value = group;
+      option.textContent = group;
+      groupSelect.appendChild(option);
+    }
+  }
+
+  // Render symbol buttons for selected group
+  function renderSymbolGrid(group) {
+    const articulations = phonemeDatabase[group].articulations;
+    symbolGrid.innerHTML = "";
+    articulations.forEach((art, index) => {
+      const btn = document.createElement("button");
+      btn.className = "symbol-btn" + (art.symbol === currentArticulation.symbol ? " active" : "");
+      btn.innerHTML = `${art.symbol}<small>${index+1}</small>`;
+      btn.addEventListener("click", () => {
+        currentArticulation = art;
+        updateActiveButton();
+        renderViseme(art);
+      });
+      symbolGrid.appendChild(btn);
+    });
+  }
+
+  function updateActiveButton() {
+    document.querySelectorAll(".symbol-btn").forEach(btn => {
+      const sym = btn.innerHTML.split("<")[0].trim();
+      if (sym === currentArticulation.symbol) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  // Render the viseme SVG and metadata
+  function renderViseme(articulation) {
+    // Clear previous
+    svgWrapper.innerHTML = "";
+    const svg = generateVisemeSVG(articulation);
+    svgWrapper.appendChild(svg);
+
+    // Update display
+    currentSymbolDisplay.textContent = articulation.symbol;
+    currentDescription.textContent = articulation.description;
+    articulationDetail.textContent = articulation.detail;
+  }
+
+  // Group change handler
+  groupSelect.addEventListener("change", (e) => {
+    currentGroup = e.target.value;
+    const articulations = phonemeDatabase[currentGroup].articulations;
+    currentArticulation = articulations[0];
+    renderSymbolGrid(currentGroup);
+    renderViseme(currentArticulation);
+  });
+
+  // Initialize
+  function init() {
+    populateGroups();
+    groupSelect.value = currentGroup;
+    renderSymbolGrid(currentGroup);
+    renderViseme(currentArticulation);
+  }
+
+  init();
+
+  // Ensure active button is set after initial render
+  window.addEventListener('load', () => {
+    updateActiveButton();
+  });
+</script>
+</body>
+</html>
